@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<!-- saved from url=(0057)file:///C:/Users/User/Downloads/soma-ads-dashboard_2.html -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Soma — Ads Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link href="./Soma — Ads Dashboard_files/css2" rel="stylesheet">
+<script src="./Soma — Ads Dashboard_files/chart.umd.js.download"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f1117; --bg2: #1a1d27; --bg3: #22263a;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
+    --text: #f0f1f5; --text2: #9a9db0; --text3: #6b6f82;
+    --blue: #1877F2; --green: #34A853; --red: #EA4335; --yellow: #FBBC04;
+    --radius: 10px; --radius-sm: 6px;
+  }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* CONNECT SCREEN */
+  .connect-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; }
+  .connect-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; max-width: 480px; width: 100%; text-align: center; }
+  .connect-box .logo { width: 52px; height: 52px; background: var(--blue); border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 24px; }
+  .connect-box h1 { font-size: 22px; font-weight: 600; margin-bottom: 0.5rem; }
+  .connect-box p { font-size: 14px; color: var(--text2); margin-bottom: 1.5rem; line-height: 1.6; }
+  .connect-box textarea { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; font-size: 13px; color: var(--text); resize: none; height: 72px; font-family: monospace; }
+  .connect-box textarea:focus { outline: none; border-color: var(--blue); }
+  .btn-connect { width: 100%; background: var(--blue); color: white; border: none; padding: 13px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
+  .btn-connect:hover { background: #1565d8; }
+  .btn-demo { width: 100%; background: transparent; border: 1px solid var(--border2); color: var(--text2); padding: 11px; border-radius: var(--radius-sm); font-size: 13px; cursor: pointer; margin-top: 8px; transition: all 0.2s; }
+  .btn-demo:hover { background: var(--bg3); color: var(--text); }
+  .status-msg { margin-top: 10px; font-size: 12px; padding: 8px 12px; border-radius: var(--radius-sm); text-align: left; }
+  .status-err { background: rgba(234,67,53,0.15); color: #ff6b6b; }
+  .status-ok { background: rgba(52,168,83,0.15); color: #5cb85c; }
+  .status-info { background: rgba(24,119,242,0.15); color: #74a9f5; }
+  .connect-hint { font-size: 11px; color: var(--text3); margin-top: 14px; line-height: 1.7; }
+  .connect-hint code { background: var(--bg3); padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+
+  /* DASHBOARD */
+  .dashboard { display: none; min-height: 100vh; }
+  .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 220px; background: var(--bg2); border-right: 1px solid var(--border); padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 4px; z-index: 100; }
+  .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 0 0.5rem; margin-bottom: 1.5rem; }
+  .sidebar-logo .icon { width: 32px; height: 32px; background: var(--blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .sidebar-logo .name { font-size: 15px; font-weight: 600; }
+  .sidebar-logo .sub { font-size: 11px; color: var(--text3); }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; color: var(--text2); border: none; background: transparent; width: 100%; text-align: left; transition: all 0.15s; }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: rgba(24,119,242,0.15); color: var(--blue); font-weight: 500; }
+  .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+  .sidebar-bottom { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .sidebar-user { font-size: 12px; color: var(--text3); padding: 0 0.5rem; margin-bottom: 8px; }
+  .btn-logout { width: 100%; background: transparent; border: 1px solid var(--border); color: var(--text2); padding: 8px; border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; }
+  .btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+  .main { margin-left: 220px; padding: 2rem; }
+  .main-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
+  .main-header h2 { font-size: 20px; font-weight: 600; }
+  .main-header .sub { font-size: 13px; color: var(--text2); margin-top: 2px; }
+  .badge-live { background: rgba(52,168,83,0.15); color: var(--green); font-size: 11px; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 5px; }
+  .badge-live::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--green); display:inline-block; }
+
+  .period-tabs { display: flex; gap: 4px; margin-bottom: 1.5rem; }
+  .ptab { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); font-size: 12px; cursor: pointer; color: var(--text2); background: transparent; transition: all 0.15s; }
+  .ptab.active { background: var(--blue); color: white; border-color: transparent; }
+
+  .accs-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.5rem; }
+  .acc-chip { padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); font-size: 11px; cursor: pointer; color: var(--text2); background: transparent; transition: all 0.15s; white-space: nowrap; }
+  .acc-chip.active { background: var(--blue); color: white; border-color: transparent; }
+
+  .alerts { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.5rem; }
+  .alert { display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px; border-radius: var(--radius-sm); font-size: 13px; }
+  .alert-r { background: rgba(234,67,53,0.1); border: 1px solid rgba(234,67,53,0.2); color: #ff8a80; }
+  .alert-y { background: rgba(251,188,4,0.1); border: 1px solid rgba(251,188,4,0.2); color: #ffd54f; }
+  .alert-g { background: rgba(52,168,83,0.1); border: 1px solid rgba(52,168,83,0.2); color: #69f0ae; }
+
+  .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 12px; margin-bottom: 1.5rem; }
+  .metric { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+  .metric .label { font-size: 11px; color: var(--text3); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .metric .value { font-size: 22px; font-weight: 600; }
+  .metric .value.g { color: var(--green); }
+  .metric .value.y { color: var(--yellow); }
+  .metric .value.r { color: var(--red); }
+
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 1.5rem; }
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
+  .card-title { font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .compare-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 1.5rem; }
+  .platform-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
+  .platform-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+  .platform-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .platform-name { font-size: 14px; font-weight: 600; }
+  .mini-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .mini-m .ml { font-size: 11px; color: var(--text3); margin-bottom: 2px; }
+  .mini-m .mv { font-size: 16px; font-weight: 600; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; font-size: 11px; font-weight: 500; color: var(--text3); padding: 8px 12px; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg3); }
+  .cg { color: var(--green); font-weight: 500; }
+  .cy { color: var(--yellow); font-weight: 500; }
+  .cr { color: var(--red); font-weight: 500; }
+
+  .table-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .table-header h3 { font-size: 15px; font-weight: 600; }
+  .search-input { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; font-size: 13px; color: var(--text); width: 200px; }
+  .search-input:focus { outline: none; border-color: var(--blue); }
+
+  .ai-output { font-size: 14px; line-height: 1.8; color: var(--text2); }
+  .ai-output strong { color: var(--text); font-weight: 500; }
+  .ai-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1.25rem; }
+  .ai-btn { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); padding: 7px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+  .ai-btn:hover { border-color: var(--blue); color: var(--blue); }
+
+  .spinner { width: 20px; height: 20px; border: 2px solid var(--border2); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; vertical-align: middle; margin-right: 8px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .footer { font-size: 11px; color: var(--text3); margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .btn-refresh { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); padding: 6px 12px; border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; }
+  .btn-refresh:hover { border-color: var(--blue); color: var(--blue); }
+</style>
+</head>
+<body>
+
+<!-- CONNECT SCREEN -->
+<div class="connect-screen" id="connectScreen">
+  <div class="connect-box">
+    <div class="logo">📊</div>
+    <h1>Soma — Ads Dashboard</h1>
+    <p>Cole seu token do Meta Ads para ver suas campanhas em tempo real. O token fica salvo só no seu navegador.</p>
+    <textarea id="tkInput" placeholder="Cole seu token aqui (EAAxxxxxxx...)"></textarea>
+    <button class="btn-connect" onclick="doConnect()">🔌 Conectar com Meta Ads</button>
+    <button class="btn-demo" onclick="doDemo()">Ver com dados de exemplo</button>
+    <div id="statusMsg"></div>
+    <p class="connect-hint">
+      Permissões necessárias: <code>ads_read</code> · <code>business_management</code><br>
+      Gere seu token em <strong>developers.facebook.com/tools/explorer</strong>
+    </p>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dashboard" id="dashboard">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="icon">📊</div>
+      <div>
+        <div class="name">Soma Ads</div>
+        <div class="sub">Dashboard</div>
+      </div>
+    </div>
+    <button class="nav-item active" onclick="showTab(&#39;overview&#39;,this)"><span class="icon">📈</span> Visão geral</button>
+    <button class="nav-item" onclick="showTab(&#39;campaigns&#39;,this)"><span class="icon">📋</span> Campanhas</button>
+    <button class="nav-item" onclick="showTab(&#39;compare&#39;,this)"><span class="icon">⚖️</span> Comparação</button>
+    <button class="nav-item" onclick="showTab(&#39;ai&#39;,this)"><span class="icon">🤖</span> Análise IA</button>
+    <div class="sidebar-bottom">
+      <div class="sidebar-user" id="sidebarUser"></div>
+      <button class="btn-logout" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="main-header">
+      <div>
+        <h2 id="pageTitle">Visão geral</h2>
+        <div class="sub" id="dashSub">Carregando...</div>
+      </div>
+      <span class="badge-live" id="liveBadge" style="display:none;">Ao vivo</span>
+    </div>
+
+    <!-- OVERVIEW -->
+    <div class="tab-content active" id="tab-overview">
+      <div class="period-tabs">
+        <button class="ptab active" onclick="setPeriod(7,this)">7 dias</button>
+        <button class="ptab" onclick="setPeriod(15,this)">15 dias</button>
+        <button class="ptab" onclick="setPeriod(30,this)">30 dias</button>
+      </div>
+      <div class="accs-row" id="accsRow"></div>
+      <div class="alerts" id="alertsDiv"></div>
+      <div class="metrics" id="metricsDiv"></div>
+      <div class="charts-row">
+        <div class="card">
+          <div class="card-title">Alcance vs Cliques</div>
+          <div style="position:relative;height:220px;"><canvas id="chart1"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Investimento por objetivo</div>
+          <div style="position:relative;height:220px;"><canvas id="chart2"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CAMPAIGNS -->
+    <div class="tab-content" id="tab-campaigns">
+      <div class="card">
+        <div class="table-header">
+          <h3>Campanhas ativas</h3>
+          <input class="search-input" type="text" id="searchInput" placeholder="Buscar campanha..." oninput="filterTable()">
+        </div>
+        <div id="tableDiv" style="overflow-x:auto;"></div>
+      </div>
+    </div>
+
+    <!-- COMPARE -->
+    <div class="tab-content" id="tab-compare">
+      <div class="compare-row">
+        <div class="platform-card">
+          <div class="platform-header">
+            <div class="platform-icon" style="background:#1877F2;">f</div>
+            <div class="platform-name">Meta Ads</div>
+          </div>
+          <div class="mini-metrics" id="metaMini"></div>
+        </div>
+        <div class="platform-card">
+          <div class="platform-header">
+            <div class="platform-icon" style="background:#EA4335;">G</div>
+            <div class="platform-name">Google Ads</div>
+          </div>
+          <div class="mini-metrics">
+            <div class="mini-m"><div class="ml">Investido</div><div class="mv">R$ 1.926</div></div>
+            <div class="mini-m"><div class="ml">CTR médio</div><div class="mv">6,04%</div></div>
+            <div class="mini-m"><div class="ml">CPC médio</div><div class="mv">R$ 0,48</div></div>
+            <div class="mini-m"><div class="ml">ROAS</div><div class="mv cr">0,01x</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">CPC por conta — Meta Ads</div>
+        <div style="position:relative;height:320px;"><canvas id="chart3"></canvas></div>
+      </div>
+    </div>
+
+    <!-- AI -->
+    <div class="tab-content" id="tab-ai">
+      <div class="card">
+        <div class="card-title">🤖 Análise inteligente</div>
+        <div id="aiDiv" class="ai-output"><span class="spinner"></span> Gerando análise com IA...</div>
+        <div class="ai-btns">
+          <button class="ai-btn" onclick="askAI(&#39;Quais campanhas devo pausar agora?&#39;)">Quais pausar?</button>
+          <button class="ai-btn" onclick="askAI(&#39;Como redistribuir meu budget?&#39;)">Redistribuir budget</button>
+          <button class="ai-btn" onclick="askAI(&#39;Como melhorar o CTR das campanhas?&#39;)">Melhorar CTR</button>
+          <button class="ai-btn" onclick="askAI(&#39;Qual unidade Belari tem melhor performance?&#39;)">Melhor unidade</button>
+          <button class="ai-btn" onclick="askAI(&#39;Sugira uma estratégia para os próximos 30 dias&#39;)">Estratégia 30 dias</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span id="lastUpdate"></span>
+      <button class="btn-refresh" onclick="refresh()">↻ Atualizar dados</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let token = '', isDemo = false, allCamps = [], period = 7;
+let chart1, chart2, chart3;
+const META = 'https://graph.facebook.com/v19.0';
+
+try { token = localStorage.getItem('soma_meta_token') || ''; } catch(e){}
+if (token) { showMsg('info','🔄 Token encontrado, conectando...'); doConnect(true); }
+
+function showMsg(type, msg) {
+  const el = document.getElementById('statusMsg');
+  el.className = 'status-msg status-' + type;
+  el.textContent = msg;
+}
+
+async function doConnect(auto) {
+  const val = auto ? token : document.getElementById('tkInput').value.trim();
+  if (!val) { showMsg('err', 'Cole o token primeiro.'); return; }
+  token = val;
+  showMsg('info', '🔄 Verificando token...');
+  try {
+    const me = await mFetch('me?fields=name,id');
+    try { localStorage.setItem('soma_meta_token', token); } catch(e){}
+    showMsg('ok', '✅ Conectado!');
+    document.getElementById('sidebarUser').textContent = me.name || 'Meta Ads';
+    setTimeout(() => {
+      isDemo = false;
+      document.getElementById('connectScreen').style.display = 'none';
+      document.getElementById('dashboard').style.display = '';
+      document.getElementById('liveBadge').style.display = '';
+      loadRealData();
+    }, 600);
+  } catch(e) {
+    showMsg('err', '❌ Token inválido: ' + e.message);
+  }
+}
+
+function doDemo() {
+  isDemo = true;
+  document.getElementById('connectScreen').style.display = 'none';
+  document.getElementById('dashboard').style.display = '';
+  document.getElementById('sidebarUser').textContent = 'Modo demo';
+  loadDemoData();
+}
+
+function doLogout() {
+  try { localStorage.removeItem('soma_meta_token'); } catch(e){}
+  token = '';
+  document.getElementById('connectScreen').style.display = '';
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('liveBadge').style.display = 'none';
+  document.getElementById('tkInput').value = '';
+  document.getElementById('statusMsg').className = '';
+  document.getElementById('statusMsg').textContent = '';
+}
+
+async function mFetch(path) {
+  const sep = path.includes('?') ? '&' : '?';
+  const res = await fetch(`${META}/${path}${sep}access_token=${token}`);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data;
+}
+
+async function loadRealData() {
+  document.getElementById('dashSub').textContent = 'Carregando contas...';
+  try {
+    const biz = await mFetch('me/businesses?fields=id,name&limit=5');
+    const bizId = biz.data?.[0]?.id;
+    if (!bizId) { loadDemoData('Sem Business Manager encontrado'); return; }
+    const accs = await mFetch(`${bizId}/owned_ad_accounts?fields=id,name&limit=50`);
+    const accounts = accs.data || [];
+    document.getElementById('dashSub').textContent = accounts.length + ' contas conectadas';
+    renderChips(accounts);
+    let insights = [], camps = [];
+    for (const acc of accounts.slice(0,10)) {
+      try {
+        const ins = await mFetch(`${acc.id}/insights?fields=spend,reach,clicks,ctr,cpc,impressions,frequency&date_preset=last_${period}_days`);
+        if (ins.data?.[0]) insights.push({...ins.data[0], name: acc.name});
+        const c = await mFetch(`${acc.id}/campaigns?fields=name,objective,status,insights{spend,reach,clicks,ctr,cpc}&date_preset=last_${period}_days&limit=20`);
+        if (c.data) camps.push(...c.data.map(x => ({...x, accountName: acc.name})));
+      } catch(e){}
+    }
+    allCamps = camps;
+    renderAll(insights);
+    document.getElementById('lastUpdate').textContent = 'Atualizado: ' + new Date().toLocaleTimeString('pt-BR');
+  } catch(e) {
+    loadDemoData('Erro: ' + e.message);
+  }
+}
+
+function loadDemoData(msg) {
+  isDemo = true;
+  document.getElementById('liveBadge').style.display = 'none';
+  document.getElementById('dashSub').textContent = msg || 'Dados de exemplo';
+  const ins = [
+    {name:'Container Oz Burguer',spend:'1105.65',reach:35013,clicks:3505,ctr:2.19,cpc:0.32,impressions:160000,frequency:1.09},
+    {name:'Belari Ipiranga',spend:'644.51',reach:20201,clicks:1616,ctr:2.51,cpc:0.40,impressions:64000,frequency:1.03},
+    {name:'Belari Osasco',spend:'572.99',reach:14782,clicks:1245,ctr:1.86,cpc:0.46,impressions:47000,frequency:1.04},
+    {name:'Belari Gelato',spend:'3487.74',reach:19488,clicks:3198,ctr:1.53,cpc:1.00,impressions:210000,frequency:1.15},
+    {name:'Belari campinas',spend:'675.21',reach:23400,clicks:178,ctr:0.04,cpc:3.79,impressions:445000,frequency:1.02},
+    {name:'Belari Limão',spend:'2100.00',reach:18000,clicks:2000,ctr:0.80,cpc:1.05,impressions:250000,frequency:1.10},
+    {name:'Rock & Ribs',spend:'1800.00',reach:12000,clicks:1279,ctr:0.70,cpc:1.41,impressions:182000,frequency:1.08},
+    {name:'Blelari Icaraí',spend:'604.64',reach:24908,clicks:177,ctr:0.04,cpc:3.42,impressions:442500,frequency:1.03},
+  ];
+  allCamps = [
+    {accountName:'Belari Gelato',name:'[AR] Expansão - Leads WP',objective:'LEAD_GENERATION',status:'ACTIVE',insights:{data:[{spend:'2862.88',reach:1534,clicks:1846,ctr:1.39,cpc:1.55}]}},
+    {accountName:'Container Oz Burguer',name:'campanha nova 28-05 +3',objective:'LINK_CLICKS',status:'ACTIVE',insights:{data:[{spend:'1105.65',reach:35013,clicks:3505,ctr:2.19,cpc:0.32}]}},
+    {accountName:'Belari campinas',name:'institucional alcance',objective:'REACH',status:'ACTIVE',insights:{data:[{spend:'675.21',reach:23400,clicks:178,ctr:0.04,cpc:3.79}]}},
+    {accountName:'Belari ViMariana',name:'institucional alcance',objective:'REACH',status:'ACTIVE',insights:{data:[{spend:'653.41',reach:29615,clicks:624,ctr:0.18,cpc:1.05}]}},
+    {accountName:'Belari Ipiranga',name:'institucional clicks',objective:'LINK_CLICKS',status:'ACTIVE',insights:{data:[{spend:'644.51',reach:20201,clicks:1616,ctr:2.51,cpc:0.40}]}},
+    {accountName:'Belari Gelato',name:'institucional trafego',objective:'LINK_CLICKS',status:'ACTIVE',insights:{data:[{spend:'624.86',reach:17954,clicks:1352,ctr:1.67,cpc:0.46}]}},
+    {accountName:'Blelari Icaraí',name:'institucional alcance',objective:'REACH',status:'ACTIVE',insights:{data:[{spend:'604.64',reach:24908,clicks:177,ctr:0.04,cpc:3.42}]}},
+    {accountName:'Belari Osasco - nova',name:'institucional cliques',objective:'LINK_CLICKS',status:'ACTIVE',insights:{data:[{spend:'572.99',reach:14782,clicks:1245,ctr:1.86,cpc:0.46}]}},
+  ];
+  renderChips(ins.map((d,i)=>({id:'acc_'+i,name:d.name})));
+  renderAll(ins);
+  document.getElementById('lastUpdate').textContent = 'Demo — cole seu token para dados reais';
+}
+
+function renderChips(accounts) {
+  const row = document.getElementById('accsRow');
+  row.innerHTML = '<button class="acc-chip active">Todas</button>';
+  accounts.forEach(a => {
+    const b = document.createElement('button');
+    b.className = 'acc-chip'; b.textContent = a.name; row.appendChild(b);
+  });
+}
+
+function renderAll(ins) {
+  renderMetrics(ins); renderAlerts(ins); renderCharts(ins); renderMetaMini(ins); renderTable(); renderAI(ins);
+}
+
+function renderMetrics(ins) {
+  const t = ins.reduce((a,i)=>({spend:a.spend+parseFloat(i.spend||0),reach:a.reach+parseInt(i.reach||0),clicks:a.clicks+parseInt(i.clicks||0),impressions:a.impressions+parseInt(i.impressions||0)}),{spend:0,reach:0,clicks:0,impressions:0});
+  const ctr=t.impressions>0?t.clicks/t.impressions*100:0;
+  const cpc=t.clicks>0?t.spend/t.clicks:0;
+  const freq=t.reach>0?t.impressions/t.reach:0;
+  document.getElementById('metricsDiv').innerHTML=[
+    {l:'Investimento',v:'R$ '+t.spend.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}),c:''},
+    {l:'Alcance',v:(t.reach/1000).toFixed(0)+'K',c:''},
+    {l:'Cliques',v:t.clicks.toLocaleString('pt-BR'),c:''},
+    {l:'CTR médio',v:ctr.toFixed(2)+'%',c:ctr>=1?'g':ctr>=0.5?'y':'r'},
+    {l:'CPC médio',v:'R$ '+cpc.toFixed(2),c:cpc<=0.8?'g':cpc<=1.5?'y':'r'},
+    {l:'Frequência',v:freq.toFixed(2),c:freq<=1.5?'g':'y'},
+    {l:'Impressões',v:(t.impressions/1000000).toFixed(1)+'M',c:''},
+    {l:'Contas ativas',v:ins.length,c:''},
+  ].map(m=>`<div class="metric"><div class="label">${m.l}</div><div class="value ${m.c}">${m.v}</div></div>`).join('');
+}
+
+function renderAlerts(ins) {
+  const bad=ins.filter(i=>parseFloat(i.cpc||0)>1.2);
+  const good=ins.filter(i=>parseFloat(i.cpc||0)<0.5&&parseFloat(i.ctr||0)>1.5);
+  let h='';
+  if(bad.length) h+=`<div class="alert alert-r">🔴 <span><strong>Pausar urgente:</strong> ${bad.map(i=>i.name).join(', ')} — CPC acima de R$1,20</span></div>`;
+  if(good.length) h+=`<div class="alert alert-g">🟢 <span><strong>Escalar agora:</strong> ${good.map(i=>i.name).join(', ')} — excelente performance</span></div>`;
+  h+=`<div class="alert alert-y">🟡 <span><strong>Google Ads ROAS 0,01x:</strong> CTR 6% mas conversão 0,74% — revise a página de destino urgente</span></div>`;
+  document.getElementById('alertsDiv').innerHTML=h;
+}
+
+function renderCharts(ins) {
+  if(chart1) chart1.destroy();
+  if(chart2) chart2.destroy();
+  chart1 = new Chart(document.getElementById('chart1'),{type:'line',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],datasets:[{label:'Alcance (K)',data:[320,290,260,310,280,240,200],borderColor:'#1877F2',backgroundColor:'rgba(24,119,242,0.08)',tension:0.4,yAxisID:'y',borderWidth:2,pointRadius:3},{label:'Cliques (K)',data:[8.2,7.6,6.9,8.1,7.4,6.2,5.1],borderColor:'#34A853',borderDash:[4,2],backgroundColor:'rgba(52,168,83,0.08)',tension:0.4,yAxisID:'y1',borderWidth:2,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#9a9db0',font:{size:11}}}},scales:{y:{position:'left',ticks:{color:'#6b6f82',font:{size:10},callback:v=>v+'K'},grid:{color:'rgba(255,255,255,0.05)'}},y1:{position:'right',ticks:{color:'#6b6f82',font:{size:10},callback:v=>v+'K'},grid:{display:false}},x:{ticks:{color:'#6b6f82',font:{size:10}},grid:{display:false}}}}});
+  const objMap={};
+  allCamps.forEach(c=>{const obj=fmtObj(c.objective);const s=parseFloat(c.insights?.data?.[0]?.spend||0);objMap[obj]=(objMap[obj]||0)+s;});
+  const labels=Object.keys(objMap); const vals=labels.map(k=>objMap[k]);
+  chart2 = new Chart(document.getElementById('chart2'),{type:'doughnut',data:{labels,datasets:[{data:vals,backgroundColor:['#1877F2','#34A853','#FBBC04','#EA4335','#9C27B0'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'right',labels:{color:'#9a9db0',font:{size:11},padding:10,boxWidth:10}}}}});
+}
+
+function renderMetaMini(ins) {
+  const t=ins.reduce((a,i)=>({spend:a.spend+parseFloat(i.spend||0),clicks:a.clicks+parseInt(i.clicks||0),impressions:a.impressions+parseInt(i.impressions||0),reach:a.reach+parseInt(i.reach||0)}),{spend:0,clicks:0,impressions:0,reach:0});
+  const ctr=t.impressions>0?t.clicks/t.impressions*100:0;
+  const cpc=t.clicks>0?t.spend/t.clicks:0;
+  document.getElementById('metaMini').innerHTML=`
+    <div class="mini-m"><div class="ml">Investido</div><div class="mv">R$ ${(t.spend/1000).toFixed(1)}K</div></div>
+    <div class="mini-m"><div class="ml">CTR médio</div><div class="mv">${ctr.toFixed(2)}%</div></div>
+    <div class="mini-m"><div class="ml">CPC médio</div><div class="mv">R$ ${cpc.toFixed(2)}</div></div>
+    <div class="mini-m"><div class="ml">Alcance</div><div class="mv">${(t.reach/1000000).toFixed(1)}M</div></div>`;
+  if(chart3) chart3.destroy();
+  const cpcData=[
+    {name:'Belari Osasco',v:0.30},{name:'Steenburguer',v:0.33},{name:'Blelari Icaraí',v:0.35},
+    {name:'Belari Uba',v:0.35},{name:'Belari campinas',v:0.36},{name:'Belari.granjaviana',v:0.42},
+    {name:'Belari Embu',v:0.44},{name:'Belari Gelato',v:0.44},{name:'Belari Cantareira',v:0.50},
+    {name:'Belari Ipiranga',v:0.53},{name:'Belari Cajamar',v:0.61},{name:'Belari ViMariana',v:1.05},
+    {name:'Belari Limão',v:1.05},{name:'Rock & Ribs',v:1.41},
+  ];
+  chart3 = new Chart(document.getElementById('chart3'),{type:'bar',data:{labels:cpcData.map(d=>d.name),datasets:[{label:'CPC',data:cpcData.map(d=>d.v),backgroundColor:cpcData.map(d=>d.v<=0.8?'#34A853':d.v<=1.2?'#FBBC04':'#EA4335'),borderRadius:4,borderWidth:0}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>'R$'+v.toFixed(2),color:'#6b6f82',font:{size:10}},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#9a9db0',font:{size:10}},grid:{display:false}}}}});
+}
+
+function renderTable() { filterTable(); }
+function filterTable() {
+  const q=(document.getElementById('searchInput')?.value||'').toLowerCase();
+  const f=allCamps.filter(c=>(c.name||'').toLowerCase().includes(q)||(c.accountName||'').toLowerCase().includes(q));
+  document.getElementById('tableDiv').innerHTML=`<table><thead><tr>
+    <th>Conta</th><th>Campanha</th><th>Objetivo</th><th>Invest.</th><th>Alcance</th><th>CTR</th><th>CPC</th>
+  </tr></thead><tbody>${f.slice(0,50).map(c=>{
+    const ins=c.insights?.data?.[0]||{};const cpc=parseFloat(ins.cpc||0);
+    const cls=cpc<=0.8?'cg':cpc<=1.5?'cy':'cr';
+    return `<tr><td>${c.accountName||'—'}</td><td>${c.name||'—'}</td><td>${fmtObj(c.objective)}</td><td>R$ ${parseFloat(ins.spend||0).toFixed(0)}</td><td>${parseInt(ins.reach||0).toLocaleString('pt-BR')}</td><td>${parseFloat(ins.ctr||0).toFixed(2)}%</td><td class="${cls}">R$ ${cpc.toFixed(2)}</td></tr>`;
+  }).join('')||'<tr><td colspan="7" style="text-align:center;padding:1.5rem;color:#6b6f82;">Nenhum resultado</td></tr>'}</tbody></table>`;
+}
+
+function fmtObj(obj) {
+  const m={LEAD_GENERATION:'Leads',LINK_CLICKS:'Cliques',REACH:'Alcance',MESSAGES:'Mensagens',CONVERSIONS:'Conversões',ENGAGEMENT:'Engajamento'};
+  return m[obj]||obj||'—';
+}
+
+async function renderAI(ins) {
+  const el=document.getElementById('aiDiv');
+  if(!el) return;
+  const total=(ins||[]).reduce((a,i)=>a+parseFloat(i.spend||0),0);
+  try {
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:`Especialista em tráfego pago no Brasil. 4 insights acionáveis com emoji. Máximo 200 palavras.\n\nMeta Ads: R$${total.toFixed(0)} | CTR 0,63% | CPC R$0,69 | Alcance 1,8M\nMelhores: Container Oz Burguer CTR 2,19% CPC R$0,32 | Belari Ipiranga CTR 2,51% CPC R$0,40\nPiores: Belari campinas CPC R$3,79 | Blelari Icaraí CPC R$3,42 | Rock & Ribs CPC R$1,41\nGoogle Ads: R$1.926 | ROAS 0,01x | CTR 6,04%`}]})});
+    const data=await res.json();
+    const text=data.content?.map(b=>b.text||'').join('')||'';
+    el.innerHTML=text?text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>'):getFallback();
+  } catch(e) { el.innerHTML=getFallback(); }
+}
+
+async function askAI(q) {
+  const el=document.getElementById('aiDiv');
+  el.innerHTML='<span class="spinner"></span> Analisando...';
+  try {
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:`Especialista em tráfego pago. Responda em português, máximo 200 palavras com emoji.\n\nDados: Meta Ads R$40.457 investidos | CTR 0,63% | CPC R$0,69 | 169 campanhas\nMelhores: Container Oz Burguer CTR 2,19% CPC R$0,32 | Belari Ipiranga CTR 2,51% CPC R$0,40\nPiores: Belari campinas CPC R$3,79 | Rock & Ribs CPC R$1,41\nGoogle Ads ROAS 0,01x\n\nPergunta: ${q}`}]})});
+    const data=await res.json();
+    const text=data.content?.map(b=>b.text||'').join('')||'';
+    el.innerHTML=text?text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>'):getFallback();
+  } catch(e) { el.innerHTML=getFallback(); }
+}
+
+function getFallback() {
+  return '🔴 <strong>Google Ads urgente:</strong> ROAS 0,01x com CTR 6% = problema na página de destino. Revise o fluxo.<br><br>🟡 <strong>Pausar:</strong> Belari campinas (R$3,79), Blelari Icaraí (R$3,42) e Rock & Ribs (R$1,41).<br><br>🟢 <strong>Escalar:</strong> Container Oz Burguer e Belari Ipiranga — CTR acima de 2%, CPC abaixo de R$0,50.<br><br>📊 <strong>Renovar criativos</strong> nas contas com CTR abaixo de 0,5%.';
+}
+
+function showTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const titles={overview:'Visão geral',campaigns:'Campanhas',compare:'Comparação',ai:'Análise IA'};
+  document.getElementById('pageTitle').textContent=titles[name]||name;
+  if(name==='ai') renderAI([]);
+}
+
+function setPeriod(days,btn) {
+  period=days;
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  if(!isDemo) loadRealData();
+}
+
+function refresh() { isDemo?loadDemoData():loadRealData(); }
+</script>
+
+
+</body></html>
