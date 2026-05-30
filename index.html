@@ -264,8 +264,7 @@ let chart1, chart2, chart3;
 const META = 'https://graph.facebook.com/v19.0';
 
 try { token = localStorage.getItem('soma_meta_token') || ''; } catch(e){}
-if (token) { showMsg('info','🔄 Token encontrado, conectando...'); doConnect(true); }
-
+if (token) { setTimeout(() => { showMsg('info','🔄 Token encontrado, conectando...'); doConnect(true); }, 500); }
 function showMsg(type, msg) {
   const el = document.getElementById('statusMsg');
   el.className = 'status-msg status-' + type;
